@@ -1,0 +1,12 @@
+{
+  "name": "mybot",
+  "version": "0.0.0",
+  "description": "mybot",
+  "main": "app.js",
+  "author": {
+    "name": "Aidan Pinard"
+  },
+  "dependencies": {
+    "discord.js": "^11.3.2"
+  }
+}

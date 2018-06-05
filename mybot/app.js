@@ -54,6 +54,18 @@ client.on("message", async message => {
         message.reply("Oh no you said a bad word!!!");
         message.delete();
     }
+
+    // A set of automatic responses
+    const responseObject = {
+        "ayy": "Ayy, lmao!",
+        "wut": "(((cONFUSEMENT)))",
+        "nani": "nani gozaimasu",
+        "hmm": "hmmmmMMMMMMMMMMMMMMMM"
+    };
+
+    if (responseObject[message.content]) {
+        message.channel.send(responseObject[message.content]);
+    };
 });
 
 client.on("message", async message => {

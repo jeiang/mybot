@@ -3,5 +3,14 @@
   "ownerID": "343517984222085134",
   "prefix": ".",
   "swearWords": [ "fuck", "nigga", "shit", "bitch", "faggot", "cocksucker", "slut", "vagina", "penis", "nigger" ],
-  "token": "MzU2Njg4Njk4MTk4MzI3Mjk2.Dfb6GQ.-bh9X2dcn6b90sTgZQHRf5PE_ns"
+  "token": "MzU2Njg4Njk4MTk4MzI3Mjk2.Dfb6GQ.-bh9X2dcn6b90sTgZQHRf5PE_ns",
+  "instructions": [
+    "ping - The latency for the bot. The API latency is the bot and the server.",
+    "play <newActivity> - Sets a new activity to play.",
+    "say <text> - Makes the bot send a message.",
+    "kick <member> <reason> - Allows administrators to kick memebers.",
+    "ban <member> <reason> - Allows administrators to ban memebers.",
+    "purge <number> - Allows for bulk deletion of messages from all users up to 100.",
+    "prefix <newPrefix> - Sets the prefix to whatever the user wants."
+  ]
 }

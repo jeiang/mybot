@@ -60,7 +60,11 @@ client.on("message", async message => {
         "ayy": "Ayy, lmao!",
         "wut": "(((cONFUSEMENT)))",
         "nani": "nani gozaimasu",
-        "hmm": "hmmmmMMMMMMMMMMMMMMMM"
+        "hmm": "hmmmmMMMMMMMMMMMMMMMM",
+        "dam": "well dam",
+        "oops": "Mistakes were made",
+        "safe": "????????",
+        "yay": "good job"
     };
 
     if (responseObject[message.content]) {
@@ -117,7 +121,7 @@ client.on("message", async message => {
         // This command must be limited to mods and admins. In this example we just hardcode the role names.
         // Please read on Array.some() to understand this bit: 
         // https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/some?
-        if (!message.member.roles.some(r => ["Administrator", "Moderator"].includes(r.name)))
+        if (!message.member.roles.some(r => ["Admins", "Moderator"].includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
 
         // Let's first check if we have a member and if we can kick them!
@@ -144,7 +148,7 @@ client.on("message", async message => {
     if (command === "ban") {
         // Most of this command is identical to kick, except that here we'll only let admins do it.
         // In the real world mods could ban too, but this is just an example, right? ;)
-        if (!message.member.roles.some(r => ["Admins"].includes(r.name)))
+        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
 
         let member = message.mentions.members.first();
@@ -175,7 +179,33 @@ client.on("message", async message => {
         const fetched = await message.channel.fetchMessages({ limit: deleteCount });
         message.channel.bulkDelete(fetched)
             .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
+
+        // Logs the change.
         console.log(`${deleteCount} messages were deleted.`)
+    }
+    
+    if (command === "prefix") {
+        // This command rewrites the prefix to whatever the admin wants.
+
+        if (!config.ownerID) return;
+
+        // Assigns the new prefix to memory
+        config.prefix = args[0];
+
+        // Deletes message
+        message.delete();
+
+        // Informs user of successful change and logs the changes.
+        message.channel.send(`The prfix has been changed to ${config.prefix}`);
+        console.log(`Prefix now set to ${config.prefix}.`)
+    }
+
+    if (command === "help") {
+        var helplist = "";
+        config.instructions.forEach(function (instruction) {
+            helplist += `${instruction} \n`;
+        });
+        message.channel.send(helplist);
     }
 
     

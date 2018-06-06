@@ -42,11 +42,18 @@ client.on("message", async message => {
 
     // This is for automatic server management and automatic reaction to messages.
     // No human occurs here
+    
 
     const discordmsg = message.content.toLowerCase();
     // This converts the content of the message to fully lowercase for the purpose of
     // comparing messages to encoded values
 
+    //Responds to automatic responses
+    if (config.responseObject[message.content]) {
+        message.channel.send(config.responseObject[message.content]);
+    };
+
+    if (!config.swearFilter) return;
     const swearWords = config.swearWords;
     // This checks the swearWords array in the config file and compares messages to them 
     // If swearWords have been detected it will automatically delete the message
@@ -54,22 +61,6 @@ client.on("message", async message => {
         message.reply("Oh no you said a bad word!!!");
         message.delete();
     }
-
-    // A set of automatic responses
-    const responseObject = {
-        "ayy": "Ayy, lmao!",
-        "wut": "(((cONFUSEMENT)))",
-        "nani": "nani gozaimasu",
-        "hmm": "hmmmmMMMMMMMMMMMMMMMM",
-        "dam": "well dam",
-        "oops": "Mistakes were made",
-        "safe": "????????",
-        "yay": "good job"
-    };
-
-    if (responseObject[message.content]) {
-        message.channel.send(responseObject[message.content]);
-    };
 });
 
 client.on("message", async message => {
@@ -97,7 +88,7 @@ client.on("message", async message => {
         const newActivity = args.join(" ");
         message.delete().catch(O_o => { });
         config.myActivity = newActivity;
-        client.user.setActivity(` ${config.myActivity}`);
+        client.user.setActivity(` ${config.myActivity}`).catch(O_o => { });
         console.log("Activity has been changed.")
     }
     if (command === "ping") {
@@ -114,7 +105,10 @@ client.on("message", async message => {
         // Then we delete the command message (sneaky, right?). The catch just ignores the error with a cute smiley thing.
         message.delete().catch(O_o => { });
         // And we get the bot to say the thing: 
-        message.channel.send(sayMessage);
+        message.channel.send(sayMessage)
+            .catch(reply => {
+                message.reply("say <text> - Makes the bot send a message.")
+            });
     }
 
     if (command === "kick") {
@@ -206,9 +200,7 @@ client.on("message", async message => {
             helplist += `${instruction} \n`;
         });
         message.channel.send(helplist);
-    }
-
-    
+    } 
 });
 
 client.login(config.token);

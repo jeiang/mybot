@@ -2,17 +2,17 @@
   "myActivity": "with senpai",
   "ownerID": "343517984222085134",
   "prefix": ".",
-  "swearWords": [ "fuck", "nigga", "bitch", "faggot", "cocksucker", "slut", "vagina", "penis", "nigger", "ass", "shit", "shiddbopbap", "cunt", "faggot", "asshole", "nigger", "wanker", "boobs", "dick", "pussy", "vagina", "penis", "anus", "retard", "gay", "lesbian", "Cato", "buller", "pantyman" ],
+  "swearWords": [ "fuck", "f u", "nigga", "bitch", "faggot", "cocksucker", "slut", "vagina", "penis", "nigger", "ass", "shit", "shiddbopbap", "cunt", "faggot", "asshole", "nigger", "wanker", "boobs", "dick", "pussy", "vagina", "penis", "anus", "retard", "gay", "lesbian", "Cato", "buller", "pantyman" ],
   "token": "MzU2Njg4Njk4MTk4MzI3Mjk2.Dfb6GQ.-bh9X2dcn6b90sTgZQHRf5PE_ns",
   "instructions": [
     "ping - The latency for the bot. The API latency is the bot and the server.",
     "play <newActivity> - Sets a new activity to play.",
     "say <text> - Makes the bot send a message.",
-    "kick <member> <reason> - Allows administrators to kick memebers.",
-    "ban <member> <reason> - Allows administrators to ban memebers.",
+    "kick <member> <reason> - Allows administrators to kick memebers. [Admin only]",
+    "ban <member> <reason> - Allows administrators to ban memebers. [Admin only]",
     "purge <number> - Allows for bulk deletion of messages from all users up to 100.",
-    "prefix <newPrefix> - Sets the prefix to whatever the user wants.",
-    "Swear Filter active."
+    "prefix <newPrefix> - Sets the prefix to whatever the user wants. [Admin only]",
+    "filter <on/off> - Sets the automatic swear filter on/off. [Admin only]"
   ],
   "swearFilter": true,
   "responseObject": {
@@ -21,6 +21,7 @@
     "hai": "furi",
     "hmm": "hmmmmMMMMMMMMMMMMMMMM",
     "nani": "nani gozaimasu",
+    "nigelspin": "https://cdn.discordapp.com/emojis/393805895131201556.gif",
     "oops": "Mistakes were made",
     "wut": "(((cONFUSEMENT)))",
     "yay": "good job"

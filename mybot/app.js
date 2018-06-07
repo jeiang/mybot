@@ -33,8 +33,13 @@ client.on("guildDelete", guild => {
 
 client.on("guildMemberAdd", (member) => {
     // This event triggers every time a new member joins a guild
-    console.log(`New User "${member.user.username}" has joined "${member.guild.name}"`);
-    member.guild.channels.get("general").send(`"${member.user.username}" has joined this server`);
+    console.log(`New User ${member.user.username} has joined ${member.guild.name}"`);
+    try {
+        member.guild.channels.find("name", "general").send(`${member.user.username} has joined this server, Yay!!!`);
+    }
+    catch (error) {
+        console.log(`Unable to process due to ${error}.`);
+    }
 });
 
 client.on("message", async message => {
@@ -51,7 +56,7 @@ client.on("message", async message => {
     //Responds to automatic responses
     if (config.responseObject[message.content]) {
         message.channel.send(config.responseObject[message.content]);
-    };
+    }
 
     if (!config.swearFilter) return;
     const swearWords = config.swearWords;
@@ -85,12 +90,16 @@ client.on("message", async message => {
 
     if (command === "play") {
         // Sets a new activity for the bot
+
+        if (!args || !config.ownerID) return;
+
         const newActivity = args.join(" ");
-        message.delete().catch(O_o => { });
+        message.delete().catch(error => { console.log(`Error: ${error}.`); });
         config.myActivity = newActivity;
-        client.user.setActivity(` ${config.myActivity}`).catch(O_o => { });
-        console.log("Activity has been changed.")
+        client.user.setActivity(` ${config.myActivity}`).catch(error => { console.log(`Error: ${error}.`); });
+        console.log("Activity has been changed.");
     }
+
     if (command === "ping") {
         // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
         // The second ping is an average latency between the bot and the websocket server (one-way, not round-trip)
@@ -107,7 +116,7 @@ client.on("message", async message => {
         // And we get the bot to say the thing: 
         message.channel.send(sayMessage)
             .catch(reply => {
-                message.reply("say <text> - Makes the bot send a message.")
+                message.reply("say <text> - Makes the bot send a message.");
             });
     }
 
@@ -175,13 +184,16 @@ client.on("message", async message => {
             .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
 
         // Logs the change.
-        console.log(`${deleteCount} messages were deleted.`)
+        console.log(`${deleteCount} messages were deleted.`);
     }
     
     if (command === "prefix") {
         // This command rewrites the prefix to whatever the admin wants.
 
-        if (!config.ownerID) return;
+        if (!config.ownerID) {
+            message.reply("You currently do not have the permissions for this action.");
+            return;
+        }
 
         // Assigns the new prefix to memory
         config.prefix = args[0];
@@ -190,15 +202,56 @@ client.on("message", async message => {
         message.delete();
 
         // Informs user of successful change and logs the changes.
-        message.channel.send(`The prfix has been changed to ${config.prefix}`);
-        console.log(`Prefix now set to ${config.prefix}.`)
+        message.channel.send(`The prefix has been changed to ${config.prefix}`);
+        console.log(`Prefix now set to ${config.prefix}.`);
+    }
+
+    if (command === "filter") {
+        // Validation of message
+
+        if (!config.ownerID) {
+            message.reply("You currently do not have the permissions for this action.");
+            return;
+        }
+
+        if (args === "on") {
+            if (config.swearFilter === true) {
+                message.channel.send("The swear filter is already active.");
+                return;
+            }
+            config.swearFilter = true;
+            message.channel.send("The swear filter is currently active.");
+        } else if (args === "off") {
+            if (config.swearFilter === false) {
+                message.channel.send("The swear filter is already deactivated.");
+                return;
+            }
+            config.swearFilter = false;
+            message.channel.send("The swear filter is currently deactivated.");
+        } else {
+            message.channel.send("Please enter on or off");
+        }
+
+
     }
 
     if (command === "help") {
+        // Command to output all useable commands
+
         var helplist = "";
+        // Output message storage variable
+
         config.instructions.forEach(function (instruction) {
+            // Compiling all instructions
             helplist += `${instruction} \n`;
         });
+        // Adding on swear filter activity
+        if (config.swearFilter) {
+            helplist += "Swear filter is active";
+        } else {
+            helplist += "Swear filter is inactive";
+        }
+        // Outputting message
         message.channel.send(helplist);
     } 
 });

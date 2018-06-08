@@ -42,14 +42,17 @@ client.on("guildMemberAdd", (member) => {
     }
 });
 
+
 client.on("message", async message => {
     // This will run on all messages without the prefix
 
     // This is for automatic server management and automatic reaction to messages.
-    // No human occurs here
-    
+    // No human intervention  occurs here
 
-    const discordmsg = message.content.toLowerCase();
+    if (message.author.bot) return;
+    // Deny bots from triggering
+
+    var discordmsg = message.content.toLowerCase();
     // This converts the content of the message to fully lowercase for the purpose of
     // comparing messages to encoded values
 
@@ -57,14 +60,50 @@ client.on("message", async message => {
     if (config.responseObject[message.content]) {
         message.channel.send(config.responseObject[message.content]);
     }
+});
+
+client.on("message", async message => {
+    // This Event is for the swear filter
+    //This function is to replace the words for the swear filter
+    function replaceSwearWords(msg, oldWord, newWord) {
+        // Taking the message to replace, the word to be replaced and what to replace it with
+        var args = msg.trim().split(/ +/g);
+        // Breaking the message up into parts, removing excess spaces
+        args.forEach(function (word, index) {
+            // Processing each word and taking its index and the value
+            if (word === oldWord) {
+                // Checking to see if the value at this index is equal to the value
+                args[index] = newWord;
+                // If true, replaces the value
+            }
+        });
+        return args.join(" ");
+        // Reconstructs the sentence using spaces 
+        // Note that special characters will have a space before and after
+    }
+
+    // This checks the swearWords array in the config file and compares messages to them 
+    // If swearWords have been detected it will replace the swear words with *censored* and repost the message
 
     if (!config.swearFilter) return;
+    // Kills process if swear filter is turned off
     const swearWords = config.swearWords;
-    // This checks the swearWords array in the config file and compares messages to them 
-    // If swearWords have been detected it will automatically delete the message
+    // Sets a new variable called swearWords instead of continuously using the full variable
     if (swearWords.some(word => discordmsg.includes(word))) {
-        message.reply("Oh no you said a bad word!!!");
-        message.delete();
+        var exp = [];
+        var regexstring = "";
+        for (i = 0; i < swearWords.length; i++) {
+            if (discordmsg.includes(swearWords[i])) {
+                exp.splice(i, 0, swearWords[i]);
+            }
+        }
+        for (i = 0; i < exp.length; i++) {
+            regexstring = exp[i];
+            msg = replaceSwearWords(discordmsg, regexstring, "[I'm stupid because I swear]");
+        }
+        console.log(`Censored a message from ${message.author}`);
+        message.reply(` said "${msg}".`);
+        message.delete().catch(error => { console.log(`Error: ${error}`); });
     }
 });
 
@@ -86,12 +125,14 @@ client.on("message", async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
+    
     // Let's go with a few common example commands! Feel free to delete or change those.
 
     if (command === "play") {
         // Sets a new activity for the bot
 
-        if (!args || !config.ownerID) return;
+        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)) || !args)
+            return message.reply("Sorry, you don't have permissions to use this!");
 
         const newActivity = args.join(" ");
         message.delete().catch(error => { console.log(`Error: ${error}.`); });
@@ -171,6 +212,9 @@ client.on("message", async message => {
     if (command === "purge") {
         // This command removes all messages from all users in the channel, up to 100.
 
+        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
+            return message.reply("Sorry, you don't have permissions to use this!");
+
         // get the delete count, as an actual number.
         const deleteCount = parseInt(args[0], 10);
 
@@ -190,10 +234,10 @@ client.on("message", async message => {
     if (command === "prefix") {
         // This command rewrites the prefix to whatever the admin wants.
 
-        if (!config.ownerID) {
-            message.reply("You currently do not have the permissions for this action.");
-            return;
-        }
+        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
+            return message.reply("Sorry, you don't have permissions to use this!");
+
+        if (!args) return message.reply("Please enter a valid prefix.");
 
         // Assigns the new prefix to memory
         config.prefix = args[0];
@@ -209,25 +253,24 @@ client.on("message", async message => {
     if (command === "filter") {
         // Validation of message
 
-        if (!config.ownerID) {
-            message.reply("You currently do not have the permissions for this action.");
-            return;
-        }
+        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
+            return message.reply("Sorry, you don't have permissions to use this!");
 
-        if (args === "on") {
+        var onOff = args.join("");
+        if (onOff === "on") {
             if (config.swearFilter === true) {
                 message.channel.send("The swear filter is already active.");
                 return;
             }
             config.swearFilter = true;
-            message.channel.send("The swear filter is currently active.");
-        } else if (args === "off") {
+            message.channel.send("The swear filter is now active.");
+        } else if (onOff === "off") {
             if (config.swearFilter === false) {
                 message.channel.send("The swear filter is already deactivated.");
                 return;
             }
             config.swearFilter = false;
-            message.channel.send("The swear filter is currently deactivated.");
+            message.channel.send("The swear filter is now deactivated.");
         } else {
             message.channel.send("Please enter on or off");
         }

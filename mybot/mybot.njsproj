@@ -29,9 +29,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
-    <Compile Include="commands.js">
-      <SubType>Code</SubType>
-    </Compile>
     <Content Include="config.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />

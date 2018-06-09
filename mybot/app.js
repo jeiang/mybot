@@ -8,27 +8,30 @@ const client = new Discord.Client();
 
 // Here we load the config.json file that contains our token and our prefix values. 
 const config = require("./config.json");
-// config.token contains the bot's token
-// config.prefix contains the message prefix.
+// config contains the bot's token and the owner ID(mine)
+
+const values = require("./values.json");
+// values contains swear words, instructions for help
+// prefix activity, and the auto response object
 
 client.on("ready", () => {
     // This event will run if the bot starts, and logs in, successfully.
     console.log(`Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
     // Example of changing the bot's playing game to something useful. `client.user` is what the
     // docs refer to as the "ClientUser".
-    client.user.setActivity(` ${config.myActivity}`);
+    client.user.setActivity(` ${values.myActivity}`);
 });
 
 client.on("guildCreate", guild => {
     // This event triggers when the bot joins a guild.
     console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-    client.user.setActivity(` ${config.myActivity}`);
+    client.user.setActivity(` ${values.myActivity}`);
 });
 
 client.on("guildDelete", guild => {
     // This event triggers when the bot is removed from a guild.
     console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
-    client.user.setActivity(` ${config.myActivity}`);
+    client.user.setActivity(` ${values.myActivity}`);
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -38,7 +41,7 @@ client.on("guildMemberAdd", (member) => {
         member.guild.channels.find("name", "general").send(`${member.user.username} has joined this server, Yay!!!`);
     }
     catch (error) {
-        console.log(`Unable to process due to ${error}.`);
+        console.log(`Error: ${error}.`);
     }
 });
 
@@ -57,8 +60,8 @@ client.on("message", async message => {
     // comparing messages to encoded values
 
     //Responds to automatic responses
-    if (config.responseObject[message.content]) {
-        message.channel.send(config.responseObject[message.content]);
+    if (values.responseObject[message.content]) {
+        message.channel.send(values.responseObject[message.content]);
     }
 });
 
@@ -79,31 +82,43 @@ client.on("message", async message => {
         });
         return args.join(" ");
         // Reconstructs the sentence using spaces 
-        // Note that special characters will have a space before and after
     }
+
+    var discordmsg = message.content.toLowerCase();
+
+    if (message.author.bot) return;
 
     // This checks the swearWords array in the config file and compares messages to them 
     // If swearWords have been detected it will replace the swear words with *censored* and repost the message
 
-    if (!config.swearFilter) return;
+    if (!values.swearFilter) return;
     // Kills process if swear filter is turned off
-    const swearWords = config.swearWords;
+    const swearWords = values.swearWords;
     // Sets a new variable called swearWords instead of continuously using the full variable
     if (swearWords.some(word => discordmsg.includes(word))) {
+        // Checks to see if the message includes any swear words
         var exp = [];
-        var regexstring = "";
+        var word = "";
+        // Creates two variables for usage in the two loops for removal of the words
         for (i = 0; i < swearWords.length; i++) {
             if (discordmsg.includes(swearWords[i])) {
                 exp.splice(i, 0, swearWords[i]);
+                // Identifies all of the swear words used in the message
             }
         }
         for (i = 0; i < exp.length; i++) {
-            regexstring = exp[i];
-            msg = replaceSwearWords(discordmsg, regexstring, "[I'm stupid because I swear]");
+            word = exp[i];
+            // Assigns a word per iteration to be replaced
+            msg = replaceSwearWords(discordmsg, word, "[Only niglets like me swear]");
+            // Sends the entire message, the word and the replacement to the function
+            // and assigns it to the new message
         }
         console.log(`Censored a message from ${message.author}`);
+        // Logs event
         message.reply(` said "${msg}".`);
+        // Sends censored version to the channel
         message.delete().catch(error => { console.log(`Error: ${error}`); });
+        // Removes initial statement with swear words
     }
 });
 
@@ -116,13 +131,13 @@ client.on("message", async message => {
 
     // Also good practice to ignore any message that does not start with our prefix, 
     // which is set in the configuration file.
-    if (message.content.indexOf(config.prefix) !== 0) return;
+    if (message.content.indexOf(values.prefix) !== 0) return;
 
     // Here we separate our "command" name, and our "arguments" for the command. 
     // e.g. if we have the message "+say Is this the real life?" , we'll get the following:
     // command = say
     // args = ["Is", "this", "the", "real", "life?"]
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+    const args = message.content.slice(values.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
     
@@ -131,14 +146,21 @@ client.on("message", async message => {
     if (command === "play") {
         // Sets a new activity for the bot
 
-        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)) || !args)
+        if (!message.member.roles.some(r => values.controlRoles.includes(r.name)) || !args)
             return message.reply("Sorry, you don't have permissions to use this!");
+        // Denies access to people without the role of Admin or Mod
 
         const newActivity = args.join(" ");
+        // Compiles args into a full statement
         message.delete().catch(error => { console.log(`Error: ${error}.`); });
-        config.myActivity = newActivity;
-        client.user.setActivity(` ${config.myActivity}`).catch(error => { console.log(`Error: ${error}.`); });
-        console.log("Activity has been changed.");
+        // Deletes command
+        values.myActivity = newActivity;
+        // Sets the new activity in values
+        client.user.setActivity(` ${values.myActivity}`).catch(error => { console.log(`Error: ${error}.`); });
+        // Sets new activity 
+        message.channel.send(`I am now playing ${values.myActivity}`);
+        console.log("Activity has been changed to " + values.myActivity + ".");
+        // Notifies users and logs the event
     }
 
     if (command === "ping") {
@@ -165,7 +187,7 @@ client.on("message", async message => {
         // This command must be limited to mods and admins. In this example we just hardcode the role names.
         // Please read on Array.some() to understand this bit: 
         // https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/some?
-        if (!message.member.roles.some(r => ["Admins", "Moderator"].includes(r.name)))
+        if (!message.member.roles.some(r => values.controlRoles.includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
 
         // Let's first check if we have a member and if we can kick them!
@@ -192,7 +214,7 @@ client.on("message", async message => {
     if (command === "ban") {
         // Most of this command is identical to kick, except that here we'll only let admins do it.
         // In the real world mods could ban too, but this is just an example, right? ;)
-        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
+        if (!message.member.roles.some(r => values.controlRoles.includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
 
         let member = message.mentions.members.first();
@@ -212,7 +234,7 @@ client.on("message", async message => {
     if (command === "purge") {
         // This command removes all messages from all users in the channel, up to 100.
 
-        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
+        if (!message.member.roles.some(r => values.controlRoles.includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
 
         // get the delete count, as an actual number.
@@ -234,45 +256,46 @@ client.on("message", async message => {
     if (command === "prefix") {
         // This command rewrites the prefix to whatever the admin wants.
 
-        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
+        if (!message.member.roles.some(r => values.controlRoles.includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
 
         if (!args) return message.reply("Please enter a valid prefix.");
 
         // Assigns the new prefix to memory
-        config.prefix = args[0];
+        values.prefix = args[0];
 
         // Deletes message
         message.delete();
 
         // Informs user of successful change and logs the changes.
-        message.channel.send(`The prefix has been changed to ${config.prefix}`);
-        console.log(`Prefix now set to ${config.prefix}.`);
+        message.channel.send(`The prefix has been changed to ${values.prefix}`);
+        console.log(`Prefix now set to ${values.prefix}.`);
     }
 
     if (command === "filter") {
-        // Validation of message
+        // Allows mods to temporarily disable the swear filter
 
-        if (!message.member.roles.some(r => ["Admins", "Mods"].includes(r.name)))
+        if (!message.member.roles.some(r => values.controlRoles.includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
 
         var onOff = args.join("");
+        // Gets the desired activition state of the filter
         if (onOff === "on") {
-            if (config.swearFilter === true) {
-                message.channel.send("The swear filter is already active.");
-                return;
-            }
-            config.swearFilter = true;
+            // Checks to see if the filter is on
+            if (values.swearFilter === true) return message.channel.send("The swear filter is already active.");
+            // Informs the user that the filter is already on if it is
+            values.swearFilter = true;
             message.channel.send("The swear filter is now active.");
+            // Informs the user of the successful activation of the filter
         } else if (onOff === "off") {
-            if (config.swearFilter === false) {
-                message.channel.send("The swear filter is already deactivated.");
-                return;
-            }
-            config.swearFilter = false;
+            if (values.swearFilter === false) return message.channel.send("The swear filter is already deactivated.");
+            // Inform the user that the filter is already off if it is
+            values.swearFilter = false;
             message.channel.send("The swear filter is now deactivated.");
+            // Informs the user of the successful activation of the filter
         } else {
             message.channel.send("Please enter on or off");
+            // Asks the user to input valid answer
         }
 
 
@@ -284,12 +307,12 @@ client.on("message", async message => {
         var helplist = "";
         // Output message storage variable
 
-        config.instructions.forEach(function (instruction) {
+        values.instructions.forEach(function (instruction) {
             // Compiling all instructions
             helplist += `${instruction} \n`;
         });
         // Adding on swear filter activity
-        if (config.swearFilter) {
+        if (values.swearFilter) {
             helplist += "Swear filter is active";
         } else {
             helplist += "Swear filter is inactive";

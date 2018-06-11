@@ -83,9 +83,10 @@ client.on("message", async message => {
 
 client.on("message", async message => {
     // This Event is for the swear filter
-    if (message.author.bot) return;
+    if (message.author.bot || !values.swearFilter) return;
 
     var discordmsg = message.content.toLowerCase();
+    if (message.content.startsWith(".filter remove")) return;
 
     // This checks the swearWords array in the config file and compares messages to them 
     // If swearWords have been detected it will replace the swear words with *censored* and repost the message
@@ -283,9 +284,10 @@ client.on("message", async message => {
             message.channel.send(mark(`${filterargs} has been added to the banned words`));
             console.log(`${filterargs} has been added to the banned words`);
         } else if (filterval.startsWith("remove")) {
-            var filterargs = filterval.slice(6).trim().split(/ +/g);
-            filter.addWords(filterargs);
-            delete filterargs;
+            var filterargs = filterval.slice(7).trim();
+            filter.removeWords(filterargs);
+            message.channel.send(mark(`${filterargs} has been removed from the banned words`));
+            console.log(`${filterargs} has been removed from the banned words`);
         } else {
             message.channel.send(mark("Please enter on or off"));
             // Asks the user to input valid answer

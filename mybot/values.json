@@ -16,7 +16,7 @@
     "ban <member> <reason> - Allows administrators to ban memebers. [Admin only]",
     "purge <number> - Allows for bulk deletion of messages from all users up to 100. [Admin only]",
     "prefix <newPrefix> - Sets the prefix to whatever the user wants. [Admin only]",
-    "filter <on/off> - Sets the automatic swear filter on/off. [Admin only]"
+    "filter <on/off> or <add/remove> <word> - Sets the automatic swear filter on/off or adds/removes a word from the swear filter. [Admin only] "
   ],
   "myActivity": "NekoPara Vol. 0",
   "prefix": ".",

@@ -14,6 +14,22 @@ const values = require("./values.json");
 // values contains swear words, instructions for help
 // prefix activity, and the auto response object
 
+var Filter = require("bad-words");
+// Creates a new Filter
+
+var filter = new Filter({ placeHolder: 'x' });
+values.whitelist.forEach(value => {
+    filter.removeWords(value);
+});
+values.blacklist.forEach(val => {
+    filter.addWords(val);
+});
+
+function mark(msg) {
+    msg = "```" + msg + "```";
+    return msg;
+}
+
 client.on("ready", () => {
     // This event will run if the bot starts, and logs in, successfully.
     console.log(`Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`);
@@ -38,7 +54,7 @@ client.on("guildMemberAdd", (member) => {
     // This event triggers every time a new member joins a guild
     console.log(`New User ${member.user.username} has joined ${member.guild.name}"`);
     try {
-        member.guild.channels.find("name", "general").send(`${member.user.username} has joined this server, Yay!!!`);
+        member.guild.channels.find("name", "general").send(mark(`${member.user.username} has joined this server, Yay!!!`));
     }
     catch (error) {
         console.log(`Error: ${error}.`);
@@ -60,63 +76,26 @@ client.on("message", async message => {
     // comparing messages to encoded values
 
     //Responds to automatic responses
-    if (values.responseObject[message.content]) {
-        message.channel.send(values.responseObject[message.content]);
+    if (values.responseObject[discordmsg]) {
+        message.channel.send(values.responseObject[discordmsg]);
     }
 });
 
 client.on("message", async message => {
     // This Event is for the swear filter
-    //This function is to replace the words for the swear filter
-    function replaceSwearWords(msg, oldWord, newWord) {
-        // Taking the message to replace, the word to be replaced and what to replace it with
-        var args = msg.trim().split(/ +/g);
-        // Breaking the message up into parts, removing excess spaces
-        args.forEach(function (word, index) {
-            // Processing each word and taking its index and the value
-            if (word === oldWord) {
-                // Checking to see if the value at this index is equal to the value
-                args[index] = newWord;
-                // If true, replaces the value
-            }
-        });
-        return args.join(" ");
-        // Reconstructs the sentence using spaces 
-    }
+    if (message.author.bot) return;
 
     var discordmsg = message.content.toLowerCase();
 
-    if (message.author.bot) return;
-
     // This checks the swearWords array in the config file and compares messages to them 
     // If swearWords have been detected it will replace the swear words with *censored* and repost the message
-
-    if (!values.swearFilter) return;
-    // Kills process if swear filter is turned off
-    const swearWords = values.swearWords;
-    // Sets a new variable called swearWords instead of continuously using the full variable
-    if (swearWords.some(word => discordmsg.includes(word))) {
-        // Checks to see if the message includes any swear words
-        var exp = [];
-        var word = "";
-        // Creates two variables for usage in the two loops for removal of the words
-        for (i = 0; i < swearWords.length; i++) {
-            if (discordmsg.includes(swearWords[i])) {
-                exp.splice(i, 0, swearWords[i]);
-                // Identifies all of the swear words used in the message
-            }
-        }
-        for (i = 0; i < exp.length; i++) {
-            word = exp[i];
-            // Assigns a word per iteration to be replaced
-            msg = replaceSwearWords(discordmsg, word, "[Only niglets like me swear]");
-            // Sends the entire message, the word and the replacement to the function
-            // and assigns it to the new message
-        }
-        console.log(`Censored a message from ${message.author}`);
+    
+    if (filter.isProfane(discordmsg)) {
+        var msg = filter.clean(discordmsg);
+        var toSend = message.author.username + " said " + msg;
+        message.channel.send(mark(toSend));
+        console.log(`Censored a message from ${message.author.username}`);
         // Logs event
-        message.reply(` said "${msg}".`);
-        // Sends censored version to the channel
         message.delete().catch(error => { console.log(`Error: ${error}`); });
         // Removes initial statement with swear words
     }
@@ -158,7 +137,7 @@ client.on("message", async message => {
         // Sets the new activity in values
         client.user.setActivity(` ${values.myActivity}`).catch(error => { console.log(`Error: ${error}.`); });
         // Sets new activity 
-        message.channel.send(`I am now playing ${values.myActivity}`);
+        message.channel.send(mark(`I am now playing ${values.myActivity}`));
         console.log("Activity has been changed to " + values.myActivity + ".");
         // Notifies users and logs the event
     }
@@ -166,18 +145,24 @@ client.on("message", async message => {
     if (command === "ping") {
         // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
         // The second ping is an average latency between the bot and the websocket server (one-way, not round-trip)
-        const m = await message.channel.send("Ping?");
-        m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
+        const m = await message.channel.send(mark("Ping?"));
+        m.edit(mark(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`));
     }
 
     if (command === "say") {
         // makes the bot say something and delete the message. As an example, it's open to anyone to use. 
         // To get the "message" itself we join the `args` back into a string with spaces: 
         const sayMessage = args.join(" ");
+
+        if (filter.isProfane(sayMessage)) return message.channel.send(mark("There shall be no cursing on my christian server"))
+            .then(message.delete()
+                .catch(error => { console.log(`Error: ${error}`); }));
+
+
         // Then we delete the command message (sneaky, right?). The catch just ignores the error with a cute smiley thing.
         message.delete().catch(O_o => { });
         // And we get the bot to say the thing: 
-        message.channel.send(sayMessage)
+        message.channel.send(mark(sayMessage))
             .catch(reply => {
                 message.reply("say <text> - Makes the bot send a message.");
             });
@@ -268,7 +253,7 @@ client.on("message", async message => {
         message.delete();
 
         // Informs user of successful change and logs the changes.
-        message.channel.send(`The prefix has been changed to ${values.prefix}`);
+        message.channel.send(mark(`The prefix has been changed to ${values.prefix}`));
         console.log(`Prefix now set to ${values.prefix}.`);
     }
 
@@ -277,24 +262,32 @@ client.on("message", async message => {
 
         if (!message.member.roles.some(r => values.controlRoles.includes(r.name)))
             return message.reply("Sorry, you don't have permissions to use this!");
-
-        var onOff = args.join("");
+        var filterval = args.join(" ");
         // Gets the desired activition state of the filter
-        if (onOff === "on") {
+        if (filterval === "on") {
             // Checks to see if the filter is on
-            if (values.swearFilter === true) return message.channel.send("The swear filter is already active.");
+            if (values.swearFilter === true) return message.channel.send(mark("The swear filter is already active."));
             // Informs the user that the filter is already on if it is
             values.swearFilter = true;
-            message.channel.send("The swear filter is now active.");
+            message.channel.send(mark("The swear filter is now active."));
             // Informs the user of the successful activation of the filter
-        } else if (onOff === "off") {
-            if (values.swearFilter === false) return message.channel.send("The swear filter is already deactivated.");
+        } else if (filterval === "off") {
+            if (values.swearFilter === false) return message.channel.send(mark("The swear filter is already deactivated."));
             // Inform the user that the filter is already off if it is
             values.swearFilter = false;
-            message.channel.send("The swear filter is now deactivated.");
+            message.channel.send(mark("The swear filter is now deactivated."));
             // Informs the user of the successful activation of the filter
+        } else if (filterval.startsWith("add")) {
+            var filterargs = filterval.slice(4).trim().split(/ +/g);
+            filter.addWords(filterargs);
+            message.channel.send(mark(`${filterargs} has been added to the banned words`));
+            console.log(`${filterargs} has been added to the banned words`);
+        } else if (filterval.startsWith("remove")) {
+            var filterargs = filterval.slice(6).trim().split(/ +/g);
+            filter.addWords(filterargs);
+            delete filterargs;
         } else {
-            message.channel.send("Please enter on or off");
+            message.channel.send(mark("Please enter on or off"));
             // Asks the user to input valid answer
         }
 
@@ -318,8 +311,8 @@ client.on("message", async message => {
             helplist += "Swear filter is inactive";
         }
         // Outputting message
-        message.channel.send(helplist);
-    } 
+        message.channel.send(mark(helplist));
+    };
 });
 
 client.login(config.token);

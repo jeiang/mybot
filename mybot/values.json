@@ -1,36 +1,12 @@
 ﻿{
-  "myActivity": "with senpai",
-  "prefix": ".",
-  "swearWords": [
+  "blacklist": [
     "niglet",
-    "fuck",
-    "f u",
-    "nigga",
-    "bitch",
-    "faggot",
-    "cocksucker",
-    "slut",
-    "vagina",
-    "penis",
-    "nigger",
-    "shit",
-    "shiddbopbap",
-    "cunt",
-    "faggot",
-    "ass",
-    "nigger",
-    "wanker",
-    "boobs",
-    "dick",
-    "pussy",
-    "vagina",
-    "penis",
-    "anus",
-    "retard",
-    "gay",
-    "Cato",
-    "buller",
-    "pantyman"
+    "infidel",
+    "nigel joseph"
+  ],
+  "controlRoles": [
+    "Admins",
+    "Mods"
   ],
   "instructions": [
     "ping - The latency for the bot. The API latency is the bot and the server.",
@@ -42,7 +18,8 @@
     "prefix <newPrefix> - Sets the prefix to whatever the user wants. [Admin only]",
     "filter <on/off> - Sets the automatic swear filter on/off. [Admin only]"
   ],
-  "swearFilter": true,
+  "myActivity": "NekoPara Vol. 0",
+  "prefix": ".",
   "responseObject": {
     "ayy": "Ayy, lmao!",
     "boi": "boiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
@@ -50,14 +27,25 @@
     "great": "IT'S GRRRRRRRRRRRRRRRRRRRRRRRRRRRREATT!!!!!!!!!!!'",
     "hai": "furi",
     "hmm": "hmmmmMMMMMMMMMMMMMMMM",
+    "hol up": "https://i.imgur.com/GACx0aJ.jpg",
     "nani": "nani gozaimasu",
     "nigelspin": "https://cdn.discordapp.com/emojis/393805895131201556.gif",
     "oops": "Mistakes were made",
+    "well dam": "well then",
     "wut": "(((cONFUSEMENT)))",
-    "yay": "good job"
+    "yay": "good job",
+    "soft loli breathing": "https://www.youtube.com/watch?v=6UfvmAo8XBU",
+    "it is bed o'clock": "https://pics.me.me/it-is-bed-oclock-you-best-be-sleeping-32287363.png",
+    "kailone": "the cyclone :cloud_tornado: :cloud_tornado: :cloud_tornado: :cloud_tornado: :cloud_tornado: :cloud_tornado: :cloud_tornado: "
   },
-  "controlRoles": [
-    "Admins",
-    "Mods"
+  "swearFilter": true,
+  "whitelist": [
+    "god",
+    "gods",
+    "hell",
+    "hells",
+    "safeguard",
+    "safeguards",
+    "safeguarding"
   ]
 }

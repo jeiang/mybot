@@ -1,33 +1,60 @@
 // Load up the discord.js library
-const Discord = require("discord.js");
+const Discord = require("discord.js"),
+    querystring = require('querystring'),
+    values = require("./values.json"),
+    config = require("./config.json"),
+    cheerio = require('cheerio'),
+    fcobj = require('fetch-cheerio-object');
 
 // This is your client. Some people call it `bot`, some people call it `self`, 
 // some might call it `cootchie`. Either way, when you see `client.something`, or `bot.something`,
 // this is what we're refering to. Your client.
 const client = new Discord.Client();
 
-// Here we load the config.json file that contains our token and our prefix values. 
-const config = require("./config.json");
-// config contains the bot's token and the owner ID(mine)
+function mark(msg) {
+    msg = "```" + msg + "```";
+    return msg;
+}
 
-const values = require("./values.json");
-// values contains swear words, instructions for help
-// prefix activity, and the auto response object
+client.on("error", (e) => console.error(e));
+client.on("warn", (e) => console.warn(e));
+client.on("debug", (e) => console.info(e));
 
 var Filter = require("bad-words");
-// Creates a new Filter
-
 var filter = new Filter({ placeHolder: 'x' });
-values.whitelist.forEach(value => {
-    filter.removeWords(value);
+values.whitelist.forEach(val => {
+    filter.removeWords(val);
 });
 values.blacklist.forEach(val => {
     filter.addWords(val);
 });
 
-function mark(msg) {
-    msg = "```" + msg + "```";
-    return msg;
+// Depending on your command framework (or if you use one), it doesn't have to
+// edit messages so you can rework it to fit your needs. Again, this doesn't have
+// to be async if you don't care about message editing.
+async function nyaaSearch(msg, args) {
+
+    // These are our two variables. One of them creates a message while we preform a search,
+    // the other generates a URL for our crawler.
+    let searchMessage = await msg.reply(mark('Searching... Sec.'));
+    let searchUrl = `https://nyaa.si/?f=1&c=0_0&q=${args}`;
+
+
+    fcobj(searchUrl)
+        .then($ => { 
+            var nyaalink = $('tbody').find('tr').first().children().slice(1).find('a').first().attr('href');
+            nyaalink = `https://nyaa.si${nyaalink}`;
+            var title = $('tbody').find('tr').first().children().slice(1).find('a').text();
+            var torrentlink = $('tbody').find('tr').first().children().slice(2).find('a').first().attr('href');
+            torrentlink = `https://nyaa.si${torrentlink}`;
+
+            var result = `Result found!\nTitle: ${title}\nLink: <${nyaalink}>\nTorrent Download: ${torrentlink}`;
+
+            searchMessage.edit(result);
+        }).catch((err) => {
+            searchMessage.edit('No results found!');
+            console.log(err);
+        });
 }
 
 client.on("ready", () => {
@@ -64,6 +91,7 @@ client.on("guildMemberAdd", (member) => {
 
 client.on("message", async message => {
     // This will run on all messages without the prefix
+    if (message.author.id === 348831851458330624) return message.channel.send("i dont listen to niglets");
 
     // This is for automatic server management and automatic reaction to messages.
     // No human intervention  occurs here
@@ -142,7 +170,7 @@ client.on("message", async message => {
         console.log("Activity has been changed to " + values.myActivity + ".");
         // Notifies users and logs the event
     }
-
+    
     if (command === "ping") {
         // Calculates ping between sending a message and editing it, giving a nice round-trip latency.
         // The second ping is an average latency between the bot and the websocket server (one-way, not round-trip)
@@ -167,6 +195,11 @@ client.on("message", async message => {
             .catch(reply => {
                 message.reply("say <text> - Makes the bot send a message.");
             });
+    }
+
+    if (command === "nyaa") {
+        var searchterms = args.join("+");
+        nyaaSearch(message, searchterms);
     }
 
     if (command === "kick") {
@@ -292,8 +325,6 @@ client.on("message", async message => {
             message.channel.send(mark("Please enter on or off"));
             // Asks the user to input valid answer
         }
-
-
     }
 
     if (command === "help") {

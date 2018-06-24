@@ -42,15 +42,27 @@ async function nyaaSearch(msg, args) {
 
     fcobj(searchUrl)
         .then($ => { 
-            var nyaalink = $('tbody').find('tr').first().children().slice(1).find('a').first().attr('href');
-            nyaalink = `https://nyaa.si${nyaalink}`;
-            var title = $('tbody').find('tr').first().children().slice(1).find('a').text();
-            var torrentlink = $('tbody').find('tr').first().children().slice(2).find('a').first().attr('href');
-            torrentlink = `https://nyaa.si${torrentlink}`;
+            searchMessage.edit(`Result found in ${searchMessage.createdTimestamp - msg.createdTimestamp}ms!`);
 
-            var result = `Result found!\nTitle: ${title}\nLink: <${nyaalink}>\nTorrent Download: ${torrentlink}`;
-
-            searchMessage.edit(result);
+            for (i = 0; i < 5; i++) {
+                var nyaalink, title, torrentlink;
+                if ($('tbody').children().slice(i).children().slice(1).find('a').first().attr('class') !== 'comments') {
+                    nyaalink = $('tbody').children().slice(i).children().slice(1).find('a').first().attr('href');
+                    nyaalink = `https://nyaa.si${nyaalink}`;
+                    title = $('tbody').children().slice(i).children().slice(1).find('a').first().text();
+                    torrentlink = $('tbody').children().slice(i).children().slice(2).find('a').first().attr('href');
+                    torrentlink = `https://nyaa.si${torrentlink}`;
+                } else {
+                    nyaalink = $('tbody').children().slice(i).children().slice(1).children().slice(1).attr('href');
+                    nyaalink = `https://nyaa.si${nyaalink}`;
+                    title = $('tbody').children().slice(i).children().slice(1).children().slice(1).attr('title');
+                    torrentlink = $('tbody').children().slice(i).children().slice(2).find('a').first().attr('href');
+                    torrentlink = `https://nyaa.si${torrentlink}`;
+                }
+                var c = i + 1;
+                msg.channel.send(`${c}. Title: ${title}\nLink: <${nyaalink}>\nTorrent Download: ${torrentlink}`).catch(err => { console.log(err) });
+            }
+            
         }).catch((err) => {
             searchMessage.edit('No results found!');
             console.log(err);
@@ -349,3 +361,5 @@ client.on("message", async message => {
 });
 
 client.login(config.token);
+
+// ADD NYAA TO HELP FILE, ADD CATEGORY FILTERS TO NYAA, COMMENT EVERYTHING AND CATCH EVERYTHING THAT CAN BE CAUGHT

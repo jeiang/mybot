@@ -4,6 +4,31 @@
     "infidel",
     "nigel joseph"
   ],
+  "categories": {
+    "/amv": "1_1",
+    "/anime": "1_0",
+    "/anime-eng": "1_2",
+    "/anime-non-eng": "1_3",
+    "/anime-raw": "1_4",
+    "/audio": "2_0",
+    "/audio-hq": "2_1",
+    "/audio-lq": "2_2",
+    "/lit": "3_0",
+    "/lit-eng": "3_1",
+    "/lit-non-eng": "3_2",
+    "/lit-raw": "3_3",
+    "/live": "4_0",
+    "/live-eng": "4_1",
+    "/live-non-eng": "4_3",
+    "/live-pv": "4_2",
+    "/live-raw": "4_4",
+    "/pictures": "5_0",
+    "/pictures-graphics": "5_1",
+    "/pictures-photos": "5_2",
+    "/software": "6_0",
+    "/software-apps": "6_1",
+    "/software-games": "6_2"
+  },
   "controlRoles": [
     "Admins",
     "Mods"
@@ -20,6 +45,10 @@
   ],
   "myActivity": "NekoPara Vol. 0",
   "prefix": ".",
+  "remakes": {
+    "none": 1,
+    "trusted": 2
+  },
   "responseObject": {
     "ayy": "Ayy, lmao!",
     "boi": "boiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",

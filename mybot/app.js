@@ -32,12 +32,12 @@ values.blacklist.forEach(val => {
 // Depending on your command framework (or if you use one), it doesn't have to
 // edit messages so you can rework it to fit your needs. Again, this doesn't have
 // to be async if you don't care about message editing.
-async function nyaaSearch(msg, args) {
+async function nyaaSearch(msg, args, remakes, categories) {
 
     // These are our two variables. One of them creates a message while we preform a search,
     // the other generates a URL for our crawler.
     let searchMessage = await msg.reply(mark('Searching... Sec.'));
-    let searchUrl = `https://nyaa.si/?f=1&c=0_0&q=${args}`;
+    let searchUrl = `https://nyaa.si/?f=${remakes}&c=${categories}&q=${args}`;
 
 
     fcobj(searchUrl)
@@ -60,9 +60,34 @@ async function nyaaSearch(msg, args) {
                     torrentlink = `https://nyaa.si${torrentlink}`;
                 }
                 var c = i + 1;
-                msg.channel.send(`${c}. Title: ${title}\nLink: <${nyaalink}>\nTorrent Download: ${torrentlink}`).catch(err => { console.log(err) });
+                msg.channel.send(`${c}. Title: ${title}\nLink: <${nyaalink}>\nTorrent Download: ${torrentlink}`).catch(err => { console.log(err); });
             }
             
+        }).catch((err) => {
+            searchMessage.edit('No results found!');
+            console.log(err);
+        });
+}
+
+async function imgSearch(msg, args) {
+
+    // These are our two variables. One of them creates a message while we preform a search,
+    // the other generates a URL for our crawler.
+    let searchMessage = await msg.reply(mark('Searching... Sec.'));
+    let searchUrl = `https://imgur.com/search/score?q=${args}`;
+
+
+    fcobj(searchUrl)
+        .then($ => {
+            searchMessage.edit(`Result found in ${searchMessage.createdTimestamp - msg.createdTimestamp}ms!`);
+            for (i = 0; i < 5; i++) {
+                var imglink;
+                imglink = $('.cards').children().slice(i).children().slice(0).attr('href');
+                imglink = `https://imgur.com${imglink}`;
+                var c = i + 1;
+                msg.channel.send(`${c}. ${imglink}`).catch(err => { console.log(err) });
+            }
+
         }).catch((err) => {
             searchMessage.edit('No results found!');
             console.log(err);
@@ -119,7 +144,7 @@ client.on("message", async message => {
     if (values.responseObject[discordmsg]) {
         message.channel.send(values.responseObject[discordmsg]);
     }
-});
+}); // Auto responder
 
 client.on("message", async message => {
     // This Event is for the swear filter
@@ -140,7 +165,7 @@ client.on("message", async message => {
         message.delete().catch(error => { console.log(`Error: ${error}`); });
         // Removes initial statement with swear words
     }
-});
+}); // Swear filter
 
 client.on("message", async message => {
     // This event will run on every single message received, from any channel or DM.
@@ -210,8 +235,29 @@ client.on("message", async message => {
     }
 
     if (command === "nyaa") {
+        var categories = args.slice(0, 1);
+        if (values.categories[categories]) {
+            categories = (values.categories[categories]);
+            args.shift();
+        } else {
+            categories = "0_0";
+        };
+        var arrlen = args.length,
+            arrlen2 = arrlen--;
+        var remakes = args.slice(arrlen2, arrlen);
+        if (values.remakes[remakes]) {
+            remakes = (values.categories[remakes]);
+            args.pop();
+        } else {
+            remakes = "0";
+        };
         var searchterms = args.join("+");
-        nyaaSearch(message, searchterms);
+        nyaaSearch(message, searchterms, remakes, categories);
+    }
+
+    if (command === "img") {
+        var searchterms = args.join("+");
+        imgSearch(message, searchterms);
     }
 
     if (command === "kick") {
@@ -358,8 +404,8 @@ client.on("message", async message => {
         // Outputting message
         message.channel.send(mark(helplist));
     };
-});
+}); // Normal command handler
 
 client.login(config.token);
 
-// ADD NYAA TO HELP FILE, ADD CATEGORY FILTERS TO NYAA, COMMENT EVERYTHING AND CATCH EVERYTHING THAT CAN BE CAUGHT
+// ADD NYAA and IMGUR TO HELP FILE, ADD CATEGORY FILTERS TO IMGUR, COMMENT EVERYTHING AND CATCH EVERYTHING THAT CAN BE CAUGHT

@@ -1,8 +1,18 @@
+const http = require('http');
+const express = require('express');
+const app = express();
+app.get("/", (request, response) => {
+  console.log(Date.now().toDateString() + " Ping Received");
+  response.sendStatus(200);
+});
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
 // Load up the discord.js library
 const Discord = require("discord.js"),
     querystring = require('querystring'),
     values = require("./values.json"),
-    config = require("./config.json"),
     cheerio = require('cheerio'),
     fcobj = require('fetch-cheerio-object');
 
@@ -44,7 +54,7 @@ async function nyaaSearch(msg, args, remakes, categories) {
         .then($ => { 
             searchMessage.edit(`Result found in ${searchMessage.createdTimestamp - msg.createdTimestamp}ms!`);
 
-            for (i = 0; i < 5; i++) {
+            for (var i = 0; i < 5; i++) {
                 var nyaalink, title, torrentlink;
                 if ($('tbody').children().slice(i).children().slice(1).find('a').first().attr('class') !== 'comments') {
                     nyaalink = $('tbody').children().slice(i).children().slice(1).find('a').first().attr('href');
@@ -80,7 +90,7 @@ async function imgSearch(msg, args) {
     fcobj(searchUrl)
         .then($ => {
             searchMessage.edit(`Result found in ${searchMessage.createdTimestamp - msg.createdTimestamp}ms!`);
-            for (i = 0; i < 5; i++) {
+            for (var i = 0; i < 5; i++) {
                 var imglink;
                 imglink = $('.cards').children().slice(i).children().slice(0).attr('href');
                 imglink = `https://imgur.com${imglink}`;
@@ -128,7 +138,6 @@ client.on("guildMemberAdd", (member) => {
 
 client.on("message", async message => {
     // This will run on all messages without the prefix
-    if (message.author.id === 348831851458330624) return message.channel.send("i dont listen to niglets");
 
     // This is for automatic server management and automatic reaction to messages.
     // No human intervention  occurs here
@@ -153,7 +162,7 @@ client.on("message", async message => {
     var discordmsg = message.content.toLowerCase();
     if (message.content.startsWith(".filter remove")) return;
 
-    // This checks the swearWords array in the config file and compares messages to them 
+    // This checks the swearWords array in the values file and compares messages to them 
     // If swearWords have been detected it will replace the swear words with *censored* and repost the message
     
     if (filter.isProfane(discordmsg)) {
@@ -175,7 +184,7 @@ client.on("message", async message => {
     if (message.author.bot) return;
 
     // Also good practice to ignore any message that does not start with our prefix, 
-    // which is set in the configuration file.
+    // which is set in the values file.
     if (message.content.indexOf(values.prefix) !== 0) return;
 
     // Here we separate our "command" name, and our "arguments" for the command. 
@@ -406,6 +415,6 @@ client.on("message", async message => {
     };
 }); // Normal command handler
 
-client.login(config.token);
+client.login( process.env.TOKEN);
 
 // ADD NYAA and IMGUR TO HELP FILE, ADD CATEGORY FILTERS TO IMGUR, COMMENT EVERYTHING AND CATCH EVERYTHING THAT CAN BE CAUGHT

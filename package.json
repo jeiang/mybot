@@ -1,0 +1,28 @@
+{
+  "name": "mybot",
+  "version": "0.0.0",
+  "description": "mybot",
+  "main": "node app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": "8.4.0"
+  },
+  "author": {
+    "name": "Aidan Pinard"
+  },
+  "dependencies": {
+    "bad-words": "^1.6.1",
+    "cheerio": "^0.22.0",
+    "discord.js": "^11.3.2",
+    "fetch-cheerio-object": "^1.2.0",
+    "htmlparser2": "^3.9.2",
+    "query-string": "^6.1.0",
+    "rss-parser": "^3.4.1",
+    "typescript": "^2.9.2",
+    "express": "^4.16.3",
+    "querystring": "^0.2.0"
+  }
+}

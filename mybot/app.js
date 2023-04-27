@@ -128,7 +128,7 @@ client.on("guildMemberAdd", (member) => {
 
 client.on("message", async message => {
     // This will run on all messages without the prefix
-    if (message.author.id === 348831851458330624) return message.channel.send("i dont listen to niglets");
+    if (message.author.id === 348831851458330624) return message.channel.send("ignoring message from unknown person.");
 
     // This is for automatic server management and automatic reaction to messages.
     // No human intervention  occurs here
